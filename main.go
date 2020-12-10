@@ -7,6 +7,7 @@ import (
 	"github.com/tink-ab/github-devstats/bazel-github-devstats/external/com_github_google_go_github/github"
 	"golang.org/x/oauth2"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -39,6 +40,15 @@ type RepoStatus struct {
 }
 
 func main() {
+	log.Println("Starting HTTP server on port 8090")
+	http.HandleFunc("/status", handleStatusRequest)
+	err := http.ListenAndServe(":8090", nil)
+	if err != nil {
+		log.Fatalf("can not start HTTP server %s", err)
+	}
+}
+
+func handleStatusRequest(writer http.ResponseWriter, request *http.Request) {
 	repoStatus, err := getRepoStatus(owner, repoName, label)
 	if err != nil {
 		log.Fatalf("can not get repo status %s", err)
@@ -46,6 +56,9 @@ func main() {
 
 	output, _ := json.MarshalIndent(repoStatus, "", "    ")
 	log.Println(string(output))
+
+	writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(repoStatus)
 }
 
 func getRepoStatus(owner string, repoName string, label string) (RepoStatus, error) {
