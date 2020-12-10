@@ -54,8 +54,8 @@ func handleStatusRequest(writer http.ResponseWriter, request *http.Request) {
 		log.Fatalf("can not get repo status %s", err)
 	}
 
-	output, _ := json.MarshalIndent(repoStatus, "", "    ")
-	log.Println(string(output))
+	//output, _ := json.MarshalIndent(repoStatus, "", "    ")
+	//log.Println(string(output))
 
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(repoStatus)
